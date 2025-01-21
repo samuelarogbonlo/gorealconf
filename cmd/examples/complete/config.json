@@ -1,0 +1,18 @@
+{
+    "server": {
+        "port": 8080,
+        "read_timeout": "5s",
+        "write_timeout": "10s"
+    },
+    "database": {
+        "host": "localhost",
+        "port": 5432,
+        "max_connections": 100,
+        "idle_timeout": "5m"
+    },
+    "features": {
+        "enable_new_ui": false,
+        "enable_beta_api": false,
+        "rollout_percent": 10.0
+    }
+}

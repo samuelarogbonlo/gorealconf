@@ -15,6 +15,12 @@ DynConf is a type-safe dynamic configuration management library for Go applicati
 - Gradual rollout strategies
 - Metrics and monitoring
 
+## Requirements
+
+- Go 1.21 or higher
+- Compatible with etcd v3.5+
+- Compatible with Consul v1.12+
+
 ## Installation
 
 ```bash
@@ -59,6 +65,14 @@ func main() {
     // Your application logic
 }
 ```
+
+## Examples
+
+See [examples](examples/) directory for:
+- Basic usage
+- Web server integration
+- Database configuration
+- Kubernetes deployment
 
 ## Documentation
 
