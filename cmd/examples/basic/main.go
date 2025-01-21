@@ -2,7 +2,7 @@ package main
 
 import (
     "context"
-    "errors" // Added this import
+    "errors"
     "log"
     "time"
 
@@ -27,18 +27,27 @@ func main() {
         dynconf.WithRollback[AppConfig](true),
     )
 
-    // You might need to use Subscribe() instead of Watch() depending on the package version
-    changes, err := cfg.Subscribe(ctx) // Changed Watch to Subscribe
-	if err != nil {
-		log.Fatal(err)  // This directly handles the error from Subscribe
-	}
+    // Initialize with a default configuration
+    initialConfig := AppConfig{
+        ServerPort: 8080,
+        Timeout:    5 * time.Second,
+    }
 
+    if err := cfg.Update(ctx, initialConfig); err != nil {
+        log.Fatal(err)
+    }
+
+    // Subscribe to changes - get both the channel and cleanup function
+    changes, cleanup := cfg.Subscribe(ctx)
+    defer cleanup() // Ensure cleanup is called when main exits
+
+    // Handle configuration updates in a separate goroutine
     go func() {
-        for newCfg := range changes {
-            log.Printf("Config updated: %+v", newCfg)
+        for update := range changes {
+            log.Printf("Config updated: %+v", update)
         }
     }()
 
-    // Application logic...
+    // Keep the application running
     select {}
 }
