@@ -29,9 +29,9 @@ func main() {
 
     // You might need to use Subscribe() instead of Watch() depending on the package version
     changes, err := cfg.Subscribe(ctx) // Changed Watch to Subscribe
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)  // This directly handles the error from Subscribe
+	}
 
     go func() {
         for newCfg := range changes {
