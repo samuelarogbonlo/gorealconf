@@ -1,6 +1,3 @@
-Here's an enhanced version of your README with all suggested changes:
-
-```markdown
 # DynConf
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/samuelarogbonlo/dynconf.svg)](https://pkg.go.dev/github.com/samuelarogbonlo/dynconf)
