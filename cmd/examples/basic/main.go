@@ -4,6 +4,9 @@ import (
     "context"
     "errors"
     "log"
+    "os"
+    "os/signal"
+    "syscall"
     "time"
 
     "github.com/samuelarogbonlo/dynconf/pkg/dynconf"
@@ -15,7 +18,9 @@ type AppConfig struct {
 }
 
 func main() {
-    ctx := context.Background()
+    // Create a cancellable context
+    ctx, cancel := context.WithCancel(context.Background())
+    defer cancel()
 
     cfg := dynconf.New[AppConfig](
         dynconf.WithValidation[AppConfig](func(old, new AppConfig) error {
@@ -27,7 +32,7 @@ func main() {
         dynconf.WithRollback[AppConfig](true),
     )
 
-    // Initialize with a default configuration
+    // Initialize configuration
     initialConfig := AppConfig{
         ServerPort: 8080,
         Timeout:    5 * time.Second,
@@ -37,17 +42,29 @@ func main() {
         log.Fatal(err)
     }
 
-    // Subscribe to changes - get both the channel and cleanup function
-    changes, cleanup := cfg.Subscribe(ctx)
-    defer cleanup() // Ensure cleanup is called when main exits
+    // Setup signal handling for graceful shutdown
+    sigChan := make(chan os.Signal, 1)
+    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-    // Handle configuration updates in a separate goroutine
+    // Watch for changes
+    changes, err := cfg.Watch(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Handle configuration updates
     go func() {
-        for update := range changes {
-            log.Printf("Config updated: %+v", update)
+        for {
+            select {
+            case newCfg := <-changes:
+                log.Printf("Config updated: %+v", newCfg)
+            case <-ctx.Done():
+                return
+            }
         }
     }()
 
-    // Keep the application running
-    select {}
+    // Wait for shutdown signal
+    sig := <-sigChan
+    log.Printf("Received signal %v, shutting down", sig)
 }

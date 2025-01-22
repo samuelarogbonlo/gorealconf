@@ -2,47 +2,82 @@ package main
 
 import (
     "context"
+    "encoding/json"
     "fmt"
     "log"
     "net/http"
+    "os"
+    "os/signal"
+    "syscall"
     "time"
 
     "github.com/samuelarogbonlo/dynconf/pkg/dynconf"
 )
 
-// Define a comprehensive configuration structure
+// Custom Duration type for JSON unmarshaling
+type Duration time.Duration
+
+func (d *Duration) UnmarshalJSON(b []byte) error {
+    var v interface{}
+    if err := json.Unmarshal(b, &v); err != nil {
+        return err
+    }
+    switch value := v.(type) {
+    case float64:
+        *d = Duration(time.Duration(value))
+        return nil
+    case string:
+        tmp, err := time.ParseDuration(value)
+        if err != nil {
+            return err
+        }
+        *d = Duration(tmp)
+        return nil
+    default:
+        return fmt.Errorf("invalid duration")
+    }
+}
+
+func (d Duration) TimeDuration() time.Duration {
+    return time.Duration(d)
+}
+
 type CompleteConfig struct {
-    // Server settings
     Server struct {
-        Port         int           `json:"port"`
-        ReadTimeout  time.Duration `json:"read_timeout"`
-        WriteTimeout time.Duration `json:"write_timeout"`
+        Port         int      `json:"port"`
+        ReadTimeout  Duration `json:"read_timeout"`
+        WriteTimeout Duration `json:"write_timeout"`
     } `json:"server"`
-
-    // Database settings
     Database struct {
-        Host         string        `json:"host"`
-        Port         int          `json:"port"`
-        MaxConns     int          `json:"max_connections"`
-        IdleTimeout  time.Duration `json:"idle_timeout"`
+        Host        string   `json:"host"`
+        Port        int      `json:"port"`
+        MaxConns    int      `json:"max_connections"`
+        IdleTimeout Duration `json:"idle_timeout"`
     } `json:"database"`
-
-    // Feature flags
     Features struct {
-        EnableNewUI     bool    `json:"enable_new_ui"`
-        EnableBetaAPI   bool    `json:"enable_beta_api"`
-        RolloutPercent  float64 `json:"rollout_percent"`
+        EnableNewUI    bool    `json:"enable_new_ui"`
+        EnableBetaAPI  bool    `json:"enable_beta_api"`
+        RolloutPercent float64 `json:"rollout_percent"`
     } `json:"features"`
 }
 
 func main() {
-    ctx := context.Background()
+    // Create context with cancellation
+    ctx, cancel := context.WithCancel(context.Background())
+    defer cancel()
+
+    // Setup signal handling
+    sigChan := make(chan os.Signal, 1)
+    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+    log.Println("Starting application...")
 
     // Create file source
-    fileSource, err := dynconf.NewFileSource[CompleteConfig]("config.json")
+    fileSource, err := dynconf.NewFileSource[CompleteConfig]("cmd/examples/complete/config.json")
     if err != nil {
-        log.Fatal(err)
+        log.Fatal("Failed to create file source:", err)
     }
+    log.Println("File source created successfully")
 
     // Create etcd source
     etcdSource, err := dynconf.NewEtcdSource[CompleteConfig](
@@ -52,9 +87,11 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
+    log.Println("Etcd source created successfully")
 
     // Create metrics
     metrics := dynconf.NewMetrics("myapp")
+    log.Println("Metrics initialized")
 
     // Create configuration with all features
     cfg := dynconf.New[CompleteConfig](
@@ -62,55 +99,105 @@ func main() {
         dynconf.WithSource(etcdSource),
         dynconf.WithValidation(validateConfig),
         dynconf.WithRollback[CompleteConfig](true),
-        dynconf.WithMetrics[CompleteConfig](metrics),  // Specify the type parameter here
+        dynconf.WithMetrics[CompleteConfig](metrics),
     )
 
     // Load initial configuration
     if err := cfg.Load(ctx); err != nil {
         log.Fatal("Failed to load configuration:", err)
     }
+    log.Printf("Initial configuration loaded: %+v", cfg.Get(ctx))
 
-    // Subscribe to configuration updates
-    updates, unsubscribe := cfg.Subscribe(ctx)
-    defer unsubscribe()
-
-    // Handle configuration updates
+    // Simulate configuration changes
     go func() {
-        for newCfg := range updates {
-            log.Printf("Applying new configuration: %+v", newCfg)
-            if err := applyConfig(newCfg); err != nil {
-                log.Printf("Error applying config: %v", err)
-            }
+        time.Sleep(2 * time.Second)
+        newConfig := CompleteConfig{
+            Server: struct {
+                Port         int      `json:"port"`
+                ReadTimeout  Duration `json:"read_timeout"`
+                WriteTimeout Duration `json:"write_timeout"`
+            }{
+                Port:         8081,
+                ReadTimeout:  Duration(10 * time.Second),
+                WriteTimeout: Duration(15 * time.Second),
+            },
+            Database: struct {
+                Host        string   `json:"host"`
+                Port        int      `json:"port"`
+                MaxConns    int      `json:"max_connections"`
+                IdleTimeout Duration `json:"idle_timeout"`
+            }{
+                Host:        "localhost",
+                Port:        5432,
+                MaxConns:    100,
+                IdleTimeout: Duration(5 * time.Minute),
+            },
+            Features: struct {
+                EnableNewUI    bool    `json:"enable_new_ui"`
+                EnableBetaAPI  bool    `json:"enable_beta_api"`
+                RolloutPercent float64 `json:"rollout_percent"`
+            }{
+                EnableNewUI:    false,
+                EnableBetaAPI:  false,
+                RolloutPercent: 10.0,
+            },
+        }
+        log.Printf("Simulating config update...")
+        if err := cfg.Update(ctx, newConfig); err != nil {
+            log.Printf("Error updating config: %v", err)
         }
     }()
 
-    // Initialize HTTP server
-    server := &http.Server{
-        Addr: fmt.Sprintf(":%d", cfg.Get(ctx).Server.Port),
-    }
+	// Initialize HTTP server
+	server := &http.Server{
+		Addr: fmt.Sprintf(":%d", cfg.Get(ctx).Server.Port),
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "Server is running!")
+		}),
+	}
 
-    // Start HTTP server
-    go func() {
-        log.Printf("Starting server on port %d", cfg.Get(ctx).Server.Port)
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            log.Fatal(err)
-        }
-    }()
+	// Create error channel
+	errChan := make(chan error, 1)
 
-    // Keep application running
-    select {}
+	// Start HTTP server
+	go func() {
+		log.Printf("Starting server on port %d", cfg.Get(ctx).Server.Port)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			errChan <- err
+			log.Printf("Server error: %v", err)
+		}
+	}()
+    // Wait for interrupt signal or server shutdown
+    select {
+	case sig := <-sigChan:
+		log.Printf("\nReceived signal %v, shutting down...", sig)
+
+		// Shutdown the server
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer shutdownCancel()
+
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Printf("Server shutdown error: %v", err)
+		}
+
+		cancel()
+		return // Exit cleanly instead of os.Exit
+
+	case <-ctx.Done():
+		log.Println("Context cancelled, shutting down...")
+		return
+	}
 }
 
-// Configuration validation
 func validateConfig(old, new CompleteConfig) error {
     // Validate server settings
     if new.Server.Port < 1024 || new.Server.Port > 65535 {
         return fmt.Errorf("invalid port: %d", new.Server.Port)
     }
-    if new.Server.ReadTimeout < time.Second {
+    if new.Server.ReadTimeout.TimeDuration() < time.Second {
         return fmt.Errorf("read timeout too short")
     }
-    if new.Server.WriteTimeout < time.Second {
+    if new.Server.WriteTimeout.TimeDuration() < time.Second {
         return fmt.Errorf("write timeout too short")
     }
 
@@ -118,7 +205,7 @@ func validateConfig(old, new CompleteConfig) error {
     if new.Database.MaxConns < 1 {
         return fmt.Errorf("max connections must be positive")
     }
-    if new.Database.IdleTimeout < time.Second {
+    if new.Database.IdleTimeout.TimeDuration() < time.Second {
         return fmt.Errorf("idle timeout too short")
     }
 
@@ -130,10 +217,11 @@ func validateConfig(old, new CompleteConfig) error {
     return nil
 }
 
-// Apply configuration changes
 func applyConfig(cfg CompleteConfig) error {
-    // Apply server changes
-    // Apply database changes
-    // Update feature flags
+    // Apply configuration changes
+    log.Printf("Applying configuration: Server Port=%d, Features: UI=%v, API=%v",
+        cfg.Server.Port,
+        cfg.Features.EnableNewUI,
+        cfg.Features.EnableBetaAPI)
     return nil
 }
