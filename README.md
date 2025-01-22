@@ -1,22 +1,22 @@
-# DynConf
+# gorealconf
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/samuelarogbonlo/dynconf.svg)](https://pkg.go.dev/github.com/samuelarogbonlo/dynconf)
-[![Build Status](https://github.com/samuelarogbonlo/dynconf/workflows/CI/badge.svg)](https://github.com/samuelarogbonlo/dynconf/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/samuelarogbonlo/dynconf)](https://goreportcard.com/report/github.com/samuelarogbonlo/dynconf)
-[![codecov](https://codecov.io/gh/samuelarogbonlo/dynconf/branch/main/graph/badge.svg)](https://codecov.io/gh/samuelarogbonlo/dynconf)
+[![Go Reference](https://pkg.go.dev/badge/github.com/samuelarogbonlo/gorealconf.svg)](https://pkg.go.dev/github.com/samuelarogbonlo/gorealconf)
+[![Build Status](https://github.com/samuelarogbonlo/gorealconf/workflows/CI/badge.svg)](https://github.com/samuelarogbonlo/gorealconf/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/samuelarogbonlo/gorealconf)](https://goreportcard.com/report/github.com/samuelarogbonlo/gorealconf)
+[![codecov](https://codecov.io/gh/samuelarogbonlo/gorealconf/branch/main/graph/badge.svg)](https://codecov.io/gh/samuelarogbonlo/gorealconf)
 
-DynConf is a type-safe dynamic configuration management library for Go applications.
+gorealconf is a type-safe dynamic configuration management library for Go applications.
 
 ## Installation
 
 Latest version:
 ```bash
-go get github.com/samuelarogbonlo/dynconf
+go get github.com/samuelarogbonlo/gorealconf
 ```
 
 Specific version:
 ```bash
-go get github.com/samuelarogbonlo/dynconf@v0.1.0
+go get github.com/samuelarogbonlo/gorealconf@v0.1.0
 ```
 
 ## Quick Start
@@ -31,11 +31,11 @@ type AppConfig struct {
 
 2. Create and use configuration:
 ```go
-cfg := dynconf.New[AppConfig]()
+cfg := gorealconf.New[AppConfig]()
 
 // Add validation
-cfg = dynconf.New[AppConfig](
-    dynconf.WithValidation[AppConfig](func(old, new AppConfig) error {
+cfg = gorealconf.New[AppConfig](
+    gorealconf.WithValidation[AppConfig](func(old, new AppConfig) error {
         if new.ServerPort < 1024 {
             return errors.New("port must be >= 1024")
         }
@@ -60,35 +60,35 @@ type Config struct {
     Port    int           `json:"port"`
     Timeout time.Duration `json:"timeout"`
 }
-cfg := dynconf.New[Config]()
+cfg := gorealconf.New[Config]()
 ```
 
 ### Multiple Configuration Sources
 ```go
-cfg := dynconf.New[Config](
-    dynconf.WithSource(fileSource),
-    dynconf.WithSource(etcdSource),
+cfg := gorealconf.New[Config](
+    gorealconf.WithSource(fileSource),
+    gorealconf.WithSource(etcdSource),
 )
 ```
 
 ### Automatic Validation & Rollback
 ```go
-cfg := dynconf.New[Config](
-    dynconf.WithValidation[Config](validateConfig),
-    dynconf.WithRollback[Config](true),
+cfg := gorealconf.New[Config](
+    gorealconf.WithValidation[Config](validateConfig),
+    gorealconf.WithRollback[Config](true),
 )
 ```
 
 ### Gradual Rollouts
 ```go
-strategy := dynconf.NewPercentageStrategy(10)
-rollout := dynconf.NewRollout[Config](cfg).
+strategy := gorealconf.NewPercentageStrategy(10)
+rollout := gorealconf.NewRollout[Config](cfg).
     WithStrategy(strategy)
 ```
 
 ### Metrics Integration
 ```go
-metrics := dynconf.NewMetrics("myapp")
+metrics := gorealconf.NewMetrics("myapp")
 cfg.WithMetrics(metrics)
 ```
 

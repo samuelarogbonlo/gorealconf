@@ -1,10 +1,10 @@
 # docs/getting-started.md
-# Getting Started with DynConf
+# Getting Started with gorealconf
 
 ## Installation
 
 ```bash
-go get github.com/samuelarogbonlo/dynconf
+go get github.com/samuelarogbonlo/gorealconf
 ```
 
 ## Basic Usage
@@ -21,9 +21,9 @@ type AppConfig struct {
 2. Create a configuration instance:
 
 ```go
-cfg := dynconf.New[AppConfig](
-    dynconf.WithValidation[AppConfig](validateConfig),
-    dynconf.WithRollback[AppConfig](true),
+cfg := gorealconf.New[AppConfig](
+    gorealconf.WithValidation[AppConfig](validateConfig),
+    gorealconf.WithRollback[AppConfig](true),
 )
 ```
 

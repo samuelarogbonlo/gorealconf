@@ -1,4 +1,4 @@
-module github.com/samuelarogbonlo/dynconf
+module github.com/samuelarogbonlo/gorealconf
 
 go 1.23.3
 

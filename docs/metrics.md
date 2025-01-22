@@ -1,7 +1,7 @@
 # docs/metrics.md
 # Metrics
 
-DynConf provides Prometheus metrics for monitoring:
+gorealconf provides Prometheus metrics for monitoring:
 
 ## Available Metrics
 
@@ -14,6 +14,6 @@ DynConf provides Prometheus metrics for monitoring:
 ## Usage
 
 ```go
-metrics := dynconf.NewMetrics("myapp")
+metrics := gorealconf.NewMetrics("myapp")
 cfg.WithMetrics(metrics)
 ```

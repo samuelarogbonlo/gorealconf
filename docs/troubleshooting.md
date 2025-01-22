@@ -20,6 +20,6 @@
 ## Debug Mode
 Enable debug logging for more information:
 ```go
-cfg := dynconf.New[Config](
-    dynconf.WithDebug(true),
+cfg := gorealconf.New[Config](
+    gorealconf.WithDebug(true),
 )

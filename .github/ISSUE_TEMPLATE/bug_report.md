@@ -20,7 +20,7 @@ A clear description of what you expected to happen.
 
 **Environment:**
  - Go version:
- - DynConf version:
+ - gorealconf version:
  - OS:
  - Dependencies versions (etcd/consul/redis if applicable):
 

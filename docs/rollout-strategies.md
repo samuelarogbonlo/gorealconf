@@ -1,27 +1,27 @@
 # docs/rollout-strategies.md
 # Rollout Strategies
 
-DynConf supports gradual configuration rollouts:
+gorealconf supports gradual configuration rollouts:
 
 ## Percentage-based Rollout
 
 ```go
-strategy := dynconf.NewPercentageStrategy(10) // 10% of instances
-rollout := dynconf.NewRollout[FeatureConfig](cfg).
+strategy := gorealconf.NewPercentageStrategy(10) // 10% of instances
+rollout := gorealconf.NewRollout[FeatureConfig](cfg).
     WithStrategy(strategy)
 ```
 
 ## Time-based Rollout
 
 ```go
-strategy := dynconf.NewTimeBasedStrategy(24 * time.Hour) // Over 24 hours
-rollout := dynconf.NewRollout[FeatureConfig](cfg
+strategy := gorealconf.NewTimeBasedStrategy(24 * time.Hour) // Over 24 hours
+rollout := gorealconf.NewRollout[FeatureConfig](cfg
 
 
 
 <!-- # Rollout Strategies
 
-DynConf provides several strategies for gradually rolling out configuration changes across your infrastructure.
+gorealconf provides several strategies for gradually rolling out configuration changes across your infrastructure.
 
 ## Available Strategies
 
@@ -29,8 +29,8 @@ DynConf provides several strategies for gradually rolling out configuration chan
 Applies changes to a specified percentage of instances.
 
 ```go
-strategy := dynconf.NewPercentageStrategy(10) // 10% of instances
-rollout := dynconf.NewRollout[FeatureConfig](cfg).
+strategy := gorealconf.NewPercentageStrategy(10) // 10% of instances
+rollout := gorealconf.NewRollout[FeatureConfig](cfg).
     WithStrategy(strategy).
     WithValidation(validateFeature)
 
@@ -43,8 +43,8 @@ if rollout.ShouldApply() {
 Gradually rolls out changes over a specified duration.
 
 ```go
-strategy := dynconf.NewTimeBasedStrategy(24 * time.Hour) // Roll out over 24 hours
-rollout := dynconf.NewRollout[FeatureConfig](cfg).
+strategy := gorealconf.NewTimeBasedStrategy(24 * time.Hour) // Roll out over 24 hours
+rollout := gorealconf.NewRollout[FeatureConfig](cfg).
     WithStrategy(strategy)
 ```
 
@@ -52,11 +52,11 @@ rollout := dynconf.NewRollout[FeatureConfig](cfg).
 Rolls out changes to specific regions first.
 
 ```go
-strategy := dynconf.NewRegionBasedStrategy(
+strategy := gorealconf.NewRegionBasedStrategy(
     []string{"us-west-1", "us-west-2"},
     currentRegion,
 )
-rollout := dynconf.NewRollout[FeatureConfig](cfg).
+rollout := gorealconf.NewRollout[FeatureConfig](cfg).
     WithStrategy(strategy)
 ```
 
@@ -66,10 +66,10 @@ rollout := dynconf.NewRollout[FeatureConfig](cfg).
 You can combine multiple strategies for more complex rollouts:
 
 ```go
-rollout := dynconf.NewRollout[FeatureConfig](cfg).
-    WithStrategy(dynconf.NewCompositeStrategy().
-        Add(dynconf.NewRegionBasedStrategy(regions, currentRegion)).
-        Add(dynconf.NewPercentageStrategy(20)),
+rollout := gorealconf.NewRollout[FeatureConfig](cfg).
+    WithStrategy(gorealconf.NewCompositeStrategy().
+        Add(gorealconf.NewRegionBasedStrategy(regions, currentRegion)).
+        Add(gorealconf.NewPercentageStrategy(20)),
     )
 ```
 
@@ -77,8 +77,8 @@ rollout := dynconf.NewRollout[FeatureConfig](cfg).
 Configure automatic rollback based on error rates:
 
 ```go
-rollout := dynconf.NewRollout[FeatureConfig](cfg).
-    WithStrategy(dynconf.NewPercentageStrategy(10)).
+rollout := gorealconf.NewRollout[FeatureConfig](cfg).
+    WithStrategy(gorealconf.NewPercentageStrategy(10)).
     WithRollbackThreshold(0.01) // Rollback if error rate exceeds 1%
 ```
 
@@ -86,7 +86,7 @@ rollout := dynconf.NewRollout[FeatureConfig](cfg).
 Add health checks to validate the rollout:
 
 ```go
-rollout := dynconf.NewRollout[FeatureConfig](cfg).
+rollout := gorealconf.NewRollout[FeatureConfig](cfg).
     WithHealthCheck(func(cfg FeatureConfig) error {
         // Verify the configuration is working as expected
         return checkFeatureHealth(cfg)
@@ -99,7 +99,7 @@ rollout := dynconf.NewRollout[FeatureConfig](cfg).
 Monitor rollout progress using built-in metrics:
 
 ```go
-metrics := dynconf.NewMetrics("myapp_rollout")
+metrics := gorealconf.NewMetrics("myapp_rollout")
 rollout.WithMetrics(metrics)
 
 // Available metrics:
@@ -134,16 +134,16 @@ rollout.OnProgress(func(event RolloutEvent) {
 ## Example: Complete Rollout Configuration
 
 ```go
-func setupRollout(cfg *dynconf.Config[FeatureConfig]) *dynconf.Rollout[FeatureConfig] {
-    return dynconf.NewRollout[FeatureConfig](cfg).
-        WithStrategy(dynconf.NewCompositeStrategy().
-            Add(dynconf.NewRegionBasedStrategy([]string{"us-west-2"}, getRegion())).
-            Add(dynconf.NewPercentageStrategy(10)),
+func setupRollout(cfg *gorealconf.Config[FeatureConfig]) *gorealconf.Rollout[FeatureConfig] {
+    return gorealconf.NewRollout[FeatureConfig](cfg).
+        WithStrategy(gorealconf.NewCompositeStrategy().
+            Add(gorealconf.NewRegionBasedStrategy([]string{"us-west-2"}, getRegion())).
+            Add(gorealconf.NewPercentageStrategy(10)),
         ).
         WithValidation(validateFeature).
         WithHealthCheck(checkFeatureHealth).
         WithRollbackThreshold(0.01).
-        WithMetrics(dynconf.NewMetrics("feature_rollout")).
+        WithMetrics(gorealconf.NewMetrics("feature_rollout")).
         OnProgress(logRolloutProgress)
 }
 

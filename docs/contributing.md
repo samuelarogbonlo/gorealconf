@@ -1,14 +1,14 @@
 
 
 # docs/contributing.md
-# Contributing to DynConf
+# Contributing to gorealconf
 
 ## Development Setup
 
 1. Fork the repository
 2. Clone your fork:
 ```bash
-git clone https://github.com/samuelarogbonlo/dynconf.git
+git clone https://github.com/samuelarogbonlo/gorealconf.git
 ```
 
 3. Install dependencies:
