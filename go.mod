@@ -1,6 +1,8 @@
 module github.com/samuelarogbonlo/gorealconf
 
-go 1.23.3
+go 1.22.0
+
+toolchain go1.23.3
 
 require (
 	github.com/fsnotify/fsnotify v1.8.0
