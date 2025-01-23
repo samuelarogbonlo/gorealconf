@@ -2,8 +2,6 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/samuelarogbonlo/gorealconf.svg)](https://pkg.go.dev/github.com/samuelarogbonlo/gorealconf)
 [![Build Status](https://github.com/samuelarogbonlo/gorealconf/workflows/CI/badge.svg)](https://github.com/samuelarogbonlo/gorealconf/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/samuelarogbonlo/gorealconf)](https://goreportcard.com/report/github.com/samuelarogbonlo/gorealconf)
-[![codecov](https://codecov.io/gh/samuelarogbonlo/gorealconf/branch/main/graph/badge.svg)](https://codecov.io/gh/samuelarogbonlo/gorealconf)
 
 `gorealconf` is a powerful, type-safe dynamic configuration management library designed for modern Go applications. With support for real-time updates, multiple configuration sources, and gradual rollouts, it ensures zero-downtime deployments while maintaining operational stability.
 
