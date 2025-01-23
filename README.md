@@ -5,7 +5,30 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/samuelarogbonlo/gorealconf)](https://goreportcard.com/report/github.com/samuelarogbonlo/gorealconf)
 [![codecov](https://codecov.io/gh/samuelarogbonlo/gorealconf/branch/main/graph/badge.svg)](https://codecov.io/gh/samuelarogbonlo/gorealconf)
 
-gorealconf is a type-safe dynamic configuration management library for Go applications.
+`gorealconf` is a powerful, type-safe dynamic configuration management library designed for modern Go applications. With support for real-time updates, multiple configuration sources, and gradual rollouts, it ensures zero-downtime deployments while maintaining operational stability.
+
+## Table of Contents
+- [Documentation](#documentation)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Key Features](#key-features-with-examples)
+- [Requirements](#requirements)
+- [Advanced Features](#advanced-features)
+- [Examples](#examples)
+- [Security](#security)
+- [Support](#support)
+- [Stability Status](#stability-status)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Documentation
+- [Getting Started](docs/getting-started.md)
+- [Configuration Sources](docs/configuration-sources.md)
+- [Rollout Strategies](docs/rollout-strategies.md)
+- [Metrics](docs/metrics.md)
+- [FAQ](docs/faq.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Roadmap](docs/ROADMAP.md)
 
 ## Installation
 
@@ -100,27 +123,26 @@ cfg.WithMetrics(metrics)
   - Redis v6+
 - Prometheus for metrics (optional)
 
-## Advanced Features
-- Graceful shutdown support
-- Health check integration
-- Automatic rollback on validation failure
-- Multiple source priority handling
-- Custom duration parsing for JSON configs
+### Key Features
+- **Type-safe Configuration**: Ensure your configurations are validated at compile time.
+- **Multiple Configuration Sources**: Combine Redis, etcd, and files for flexibility.
+- **Automatic Validation & Rollback**: Catch and rollback bad configurations automatically.
+- **Gradual Rollouts**: Deploy new configurations incrementally.
+- **Metrics Integration**: Export configuration change metrics via Prometheus.
 
 ## Examples
-See [Examples](examples/) directory for:
-- Basic usage (`examples/basic/`)
-- Multi-source configuration (`examples/multistore/`)
-- Gradual rollouts (`examples/rollout/`)
-- Complete server example (`examples/complete/`)
 
-## Documentation
-- [Getting Started](docs/getting-started.md)
-- [Configuration Sources](docs/configuration-sources.md)
-- [Rollout Strategies](docs/rollout-strategies.md)
-- [Metrics](docs/metrics.md)
-- [FAQ](docs/faq.md)
-- [Troubleshooting](docs/troubleshooting.md)
+Explore the examples provided to understand how to use `gorealconf` in different scenarios:
+
+- **[Basic Usage](examples/basic/main.go)**: Learn how to set up a simple configuration.
+- **[Multi-source Configuration](examples/multistore/main.go)**: Use multiple configuration backends with priority handling.
+- **[Webserver Integration](examples/webserver/main.go)**: Configure and manage dynamic settings for a webserver.
+- **[Database Configuration](examples/database/main.go)**: Dynamically update and manage database configurations.
+- **[Gradual Rollouts](examples/rollout/main.go)**: Deploy configuration updates incrementally and safely.
+- **[Complete Setup](examples/complete/main.go)**: A fully functional example combining multiple sources, validation, and rollouts.
+
+Each example includes inline comments and demonstrates real-world usage scenarios. Visit the [examples/](examples/) directory for the full code.
+
 
 ## Security
 For security concerns, please email sbayo971@gmail.com
