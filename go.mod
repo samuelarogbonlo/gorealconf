@@ -5,11 +5,11 @@ go 1.22.0
 toolchain go1.23.3
 
 require (
-	github.com/fsnotify/fsnotify v1.8.0
+	github.com/fsnotify/fsnotify v1.7.0 // Latest stable
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/hashicorp/consul/api v1.31.0
-	github.com/prometheus/client_golang v1.20.5
-	go.etcd.io/etcd/client/v3 v3.5.17
+	github.com/hashicorp/consul/api v1.26.1 // Latest stable
+	github.com/prometheus/client_golang v1.20.4 // Latest stable
+	go.etcd.io/etcd/client/v3 v3.5.11 // Latest stable
 )
 
 require (
